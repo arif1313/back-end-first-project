@@ -4,7 +4,8 @@ import {
   LocalGuardian,
   Student,
   UserName,
-} from './student/student.interface';
+} from './student.interface';
+
 const userNameSchema = new Schema<UserName>({
   firstName: {
     type: String,
@@ -75,10 +76,16 @@ const localGuradianSchema = new Schema<LocalGuardian>({
 const studentSchema = new Schema<Student>(
   {
     id: { type: String, required: [true, 'ID is required'], unique: true },
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      maxlength: [20, 'Password can not be more than 20 characters'],
+    // password: {
+    //   type: String,
+    // required: [true, 'Password is required'],
+    //   maxlength: [20, 'Password can not be more than 20 characters'],
+    // },
+    userId: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'User Id  is required'],
+      unique: true,
+      ref: 'UserModel',
     },
     name: {
       type: userNameSchema,
@@ -127,14 +134,15 @@ const studentSchema = new Schema<Student>(
       required: [true, 'Local guardian information is required'],
     },
     profileImg: { type: String },
-    isActive: {
-      type: String,
-      enum: {
-        values: ['active', 'blocked'],
-        message: '{VALUE} is not a valid status',
-      },
-      default: 'active',
-    },
+    // is active control by userModel
+    // isActive: {
+    //   type: String,
+    //   enum: {
+    //     values: ['active', 'blocked'],
+    //     message: '{VALUE} is not a valid status',
+    //   },
+    //   default: 'active',
+    // },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -146,4 +154,28 @@ const studentSchema = new Schema<Student>(
     },
   },
 );
+studentSchema.virtual('fullname').get(function () {
+  return `${this.name.firstName}  ${this.name.middleName}  ${this.name.lastName}`;
+});
+// Query Middleware
+studentSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+studentSchema.pre('findOne', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+studentSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
+
+//creating a custom static method
+studentSchema.statics.isUserExists = async function (id: string) {
+  const existingUser = await StudentModel.findOne({ id });
+  return existingUser;
+};
 export const StudentModel = model<Student>('student', studentSchema);

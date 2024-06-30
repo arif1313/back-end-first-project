@@ -1,7 +1,10 @@
 import express /* { Request, Response } */ from 'express';
-import { StudentControlers } from './student.controler';
+import { UserControlers } from './user.controler';
+
 // import { StudentModel } from "../student.model";
 const Router = express.Router();
+
+Router.post('/create-student', UserControlers.createAstudent);
 
 /*async(req:Request,res:Response)=>{
     const student= req.body;
@@ -13,7 +16,4 @@ const Router = express.Router();
     })
 })*/
 
-Router.get('/', StudentControlers.getStudents);
-Router.get('/:id', StudentControlers.getAsingleStudent);
-Router.delete('/:id', StudentControlers.deleteAsingleStudent);
-export const studentRouter = Router;
+export const userRouter = Router;

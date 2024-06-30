@@ -2,20 +2,6 @@ import { Request, Response } from 'express';
 import { studentService } from './student.service';
 // import { error } from 'console';
 
-const createAstudent = async (req: Request, res: Response) => {
-  try {
-    const student = req.body.student;
-    const result = await studentService.createStudentInDb(student);
-
-    res.status(200).json({
-      success: true,
-      message: 'student created succes',
-      data: result,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
 const getStudents = async (req: Request, res: Response) => {
   try {
     const result = await studentService.getStudentsFromDb();
@@ -37,8 +23,17 @@ const getAsingleStudent = async (req: Request, res: Response) => {
     data: result,
   });
 };
+const deleteAsingleStudent = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await studentService.deleteAStudentFromDb(id);
+  res.status(200).json({
+    success: true,
+    message: 'Deleted a single data',
+    data: result,
+  });
+};
 export const StudentControlers = {
-  createAstudent,
   getStudents,
   getAsingleStudent,
+  deleteAsingleStudent,
 };
